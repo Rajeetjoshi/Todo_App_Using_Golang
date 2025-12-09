@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timeline - ToDo</title>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #6b2dbd, #3d1b91);
+      color: #f8f8f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+      min-height: 100vh;
+    }
+
+    h2 { margin-bottom: 30px; font-size: 2rem; }
+
+    ul { list-style: none; padding: 0; width: 100%; max-width: 420; }
+
+    li {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 15px;
+      margin-bottom: 14px;
+      border-radius: 12px;
+    }
+
+    form { display: flex; flex-direction: column; gap: 6px; }
+
+    input[type="text"] {
+      background: rgba(255, 255, 255, 0.15);
+      border: none; padding: 8px 10px;
+      border-radius: 6px; color: #fff;
+    }
+
+    .btn-group { display: flex; justify-content: space-between; margin-top: 8px; }
+.edit-btn{
+  background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+}
+.edit-btn:hover{
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+
+    .pin-btn{
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color:#000;
+}
+.pin-btn:hover{
+  transform: translateY(-2px);
+  background:linear-gradient(135deg, #fcd34d, #fbbf24);
+}
+    .delete-btn { 
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    }
+    .delete-btn:hover { 
+      transform: translateY(-2px);
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+     }
+
+    a { color: #fff; margin-top: 25px; text-decoration: none; }
+
+    .popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; max-width: 420px; height: 100%;
+      background: rgba(0,0,0,0.55);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .popup-box {
+      background: white;
+      color: black;
+      padding: 25px;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 16px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .popup-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .popup-btn {
+      width: 100%;
+      max-width: 420px;
+      padding: 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      border: none;
+    }
+
+    .confirm-btn { background: #ef4444; color: white; }
+    .cancel-btn { background: #e5e5e5; }
+
+    .hidden { display: none; }
+   .add-task-container {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.add-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+width: 100%;
+max-width: 420px;
+  height: 50px;
+background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
+color: #fff;
+  border-radius: 12px;
+  font-size: 28px;
+  font-weight: bold;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.add-btn:hover {
+  transform: scale(1.08);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.add-text {
+  margin-top: 6px;
+  opacity: 0.9;
+  font-size: 14px;
+}
+@media (max-width: 480px) {
+
+  .todo-container, 
+  ul, 
+  .container {
+    width: 100% !important;
+    max-width: 420px;
+    padding: 20px !important;
+  }
+
+  input, button {
+    font-size: 14px !important;
+  }
+
+  h2 {
+    font-size: 24px !important;
+    text-align: center;
+  }
+}
+  </style>
+
+<script>
+let formToDelete = null;
+
+function openDeletePopup(form) {
+  formToDelete = form;
+  document.getElementById("delete-popup").classList.remove("hidden");
+}
+
+function closeDeletePopup() {
+  document.getElementById("delete-popup").classList.add("hidden");
+  formToDelete = null;
+}
+
+function confirmDelete() {
+  if (!formToDelete) return;
+  formToDelete.action = "/timeline/delete";
+  formToDelete.method = "POST";
+
+  formToDelete.submit();
+}
+</script>
+
+</head>
+
+<body>
+  <h2>Task Timeline</h2>
+
+  <div class="add-task-container">
+    <a href="/home" class="add-btn">+</a>
+    <p class="add-text">Add new Task</p>
+  </div>
+
+  <ul>
+    {{range .timeline}}
+      <li>
+        <form method="POST" action="/timeline/edit">
+          <input type="hidden" name="id" value="{{.id}}">
+          <input type="text" name="task" value="{{.task}}">
+          <small>Added on: {{.time}}</small>
+
+          <div class="btn-group">
+            <button type="submit" class="edit-btn">Update</button>
+
+            <button type="submit" formaction="/timeline/pin" class="pin-btn">
+              {{if eq .pinned 1}}Unpin{{else}}Pin{{end}}
+            </button>
+            <button type="button" class="delete-btn" onclick="openDeletePopup(this.form)">Delete</button>
+          </div>
+        </form>
+      </li>
+    {{end}}
+  </ul>
+
+  <a href="/home">Back to Home</a>
+  <div id="delete-popup" class="popup-overlay hidden">
+    <div class="popup-box">
+      <p>Are you sure you want to delete this task?</p>
+
+      <div class="popup-buttons">
+        <button class="popup-btn cancel-btn" onclick="closeDeletePopup()">No</button>
+        <button class="popup-btn confirm-btn" onclick="confirmDelete()">Yes</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

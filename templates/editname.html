@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Name</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f6f8fc;
+            padding: 40px;
+        }
+
+        .box {
+            width: 380px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.12);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-size: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 13px;
+            background: #006aff;
+            color: white;
+            border: none;
+            margin-top: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background: #0053d8;
+        }
+
+        .cancel {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #444;
+            text-decoration: none;
+        }
+
+        .cancel:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+    <div class="title">Edit Name</div>
+
+    <form action="/update-name" method="POST">
+        
+        <label>Current Name:</label>
+        <input type="text" value="{{.CurrentName}}" readonly>
+
+        <label>New Name:</label>
+        <input type="text" name="new_name" placeholder="Enter new name" required>
+
+        <button class="btn" type="submit">Save</button>
+    </form>
+
+    <a class="cancel" href="/home">Cancel</a>
+</div>
+
+</body>
+</html>

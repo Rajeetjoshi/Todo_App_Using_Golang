@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ToDo - Home</title>
+  <style>
+    html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;  /* hide horizontal scroll */
+    overflow-y: hidden;  /* hide vertical scroll */
+}
+
+    body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, #2575fc, #81cb11);
+  margin: 0;
+  padding: 0;
+  color: white;
+}
+
+h2 {
+  margin-top: 0px;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.todo-container {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  border-radius: 18px;
+  padding: 35px 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  margin-top: 10px;
+}
+
+label {
+  display: block;
+  margin-top: 18px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #f7f7f7;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  max-width: 420px;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 6px;
+  font-size: 15px;
+  background: rgba(255,255,255,0.9);
+  color: #333;
+  outline: none;
+}
+
+button {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 25px;
+  padding: 12px 0;
+  background: #ffffff;
+  color: #2575fc;
+  font-size: 17px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+button:hover {
+  background: #e9e9e9;
+}
+
+.footer-links {
+  margin-top: 30px;
+  font-size: 16px;
+}
+
+.footer-links a {
+  color: white;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.popup-overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.popup-box {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+  color: black;
+}
+
+.popup-btn {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 5px;
+}
+
+.ok-btn {
+  background: #2575fc;
+  color: white;
+}
+
+.cancel-btn {
+  background: lightgray;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@media (max-width: 480px) {
+
+  .todo-container, 
+  ul, 
+  .container {
+    width: 100% !important;
+    max-width: 420px;
+    padding: 20px !important;
+  }
+
+  input, button {
+    font-size: 14px !important;
+  }
+
+  h2 {
+    font-size: 24px !important;
+    text-align: center;
+  }
+}
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 20px 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(255,255,255,0.4);
+    border-radius: 0 0 20px 20px;
+}
+
+.navbar .nav-right a {
+    color: white;
+    margin-left: 20px;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.navbar .nav-right a:hover {
+    text-decoration: underline;
+}
+.profile-btn {
+    background: white;
+    color: #333;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: 0.2s ease-in-out;
+}
+
+.profile-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.profile-btn:active {
+    transform: scale(0.97);
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+}
+
+.modal-content {
+    background: #fff;
+    width: 90%;
+    max-width: 480px;
+    padding: 30px;
+    border-radius: 20px;
+    color: #222;
+    position: relative;
+
+    box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+    animation: fadeInModal 0.25s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; transform: translateY(-15px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 26px;
+    cursor: pointer;
+    color: #444;
+}
+.modal-content label {
+    color: #000 !important;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+.modal-content input:focus {
+    border: 1px solid #3A8DFF;
+    background: #e5d7d7 !important;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+
+.update-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: none;
+    background: #0066ff;
+    color: white;
+    border-radius: 12px;
+    cursor: pointer;
+}
+.profile-field-group {
+    display: flex;
+    flex-direction: column;   
+    gap: 10px;                
+}
+.profile-field-group input,
+.modal-content input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1.4px solid #cfcfcf;
+    background: #fff;
+    font-size: 15px;
+    outline: none;
+    display: block;
+    margin-bottom: 15px;
+}
+
+/* Bottom button container */
+.bottom-buttons {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px; /* spacing from bottom */
+}
+
+/* Button style */
+.btn-bottom {
+    padding: 10px 20px;
+    background: white;
+    color: #0066ff;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: 0.2s ease;
+}
+
+.btn-bottom:hover {
+    transform: scale(1.05);
+}
+
+.logout {
+    color: red;
+}
+.top-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 30px;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    z-index: 999;
+}
+
+.nav-btn {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    color: #333;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: 0.3s ease-in-out;
+}
+
+.nav-btn:hover {
+    transform: translateY(-2px);
+}
+
+.logout-btn {
+    background: #ff4444;
+    color: white;
+}
+.page-content {
+    margin-top: 130px;   /* PUSH PAGE DOWN BELOW NAVBAR */
+    text-align: center;
+}
+.center-box {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+  </style>
+</head>
+<body>
+ <div class="top-navbar">
+    <button class="nav-btn" onclick="openProfile()">My Profile</button>
+    <a href="/timeline" class="nav-btn">Timeline</a>
+    <a href="/logout" class="logout-btn">Logout</a>
+</div>
+
+  <div class="page-content">
+
+<h2>Welcome, {{.user}}!</h2>
+
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+
+        <!-- Close button -->
+        <span class="close" id="closeModal">&times;</span>
+
+        <!-- PROFILE FORM -->
+        <form action="/update-profile" method="POST">
+
+            <!-- NAME SECTION -->
+<!-- NAME SECTION (Editable inline) -->
+<label>Name:</label>
+<div class="profile-field-group" id="nameDisplayBlock">
+  <!-- Display current name (readonly) -->
+  <input type="text" value="{{.Name}}" readonly id="currentNameDisplay">
+
+  <!-- "Edit" toggles the dropdown-like edit UI -->
+  <button type="button" id="editNameBtn" style="display:inline-block;margin-top:8px;color:#0066ff;font-weight:600;background:none;border:none;cursor:pointer;">
+    Edit
+  </button>
+</div>
+
+<!-- Inline "dropdown" edit UI (hidden by default).
+     NOTE: This is inside the same /update-profile form, so the confirm will submit that form. -->
+<div id="nameEditDropdown" style="display:none;margin-top:10px;">
+
+  <!-- A small select showing the current name (keeps the UI the user asked for) -->
+  <label style="font-size:13px;font-weight:600;color:#000;margin-bottom:6px;">Current</label>
+  <select disabled style="width:100%;padding:10px;border-radius:8px;border:1.2px solid #cfcfcf;background:#fff;margin-bottom:10px;">
+    <option>{{.Name}}</option>
+  </select>
+
+  <!-- New name input (this name must match what your server expects: new_name) -->
+  <label style="font-size:13px;font-weight:600;color:#000;margin-bottom:6px;">New name</label>
+  <input type="text" name="new_name" id="newNameInput" placeholder="Enter new name" style="width:100%;padding:12px;border-radius:8px;border:1.2px solid #cfcfcf;background:#fff;margin-bottom:10px;">
+
+  <!-- Confirm button - submits the same /update-profile form -->
+  <div style="display:flex;gap:10px;">
+    <button type="submit" class="update-btn" onclick="return confirmNameChange()" style="flex:1;">Confirm</button>
+    <button type="button" class="cancel-btn" onclick="toggleNameEdit(false)" style="flex:1;background:#e5e5e5;border-radius:8px;border:none;padding:12px;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
+<script>
+  // Toggle the inline name edit dropdown
+  function toggleNameEdit(show) {
+    const el = document.getElementById('nameEditDropdown');
+    const editBtn = document.getElementById('editNameBtn');
+    if (show === undefined) show = el.style.display === 'none';
+    el.style.display = show ? 'block' : 'none';
+    editBtn.innerText = show ? 'Close' : 'Edit';
+    if (show) {
+      // focus the new-name input for convenience
+      document.getElementById('newNameInput').focus();
+    }
+  }
+
+  document.getElementById('editNameBtn').addEventListener('click', function() {
+    toggleNameEdit();
+  });
+
+  // Optional: simple front-end validation before submitting the parent /update-profile form
+  function confirmNameChange() {
+    const newName = document.getElementById('newNameInput').value.trim();
+    if (newName === '') {
+      alert('New name cannot be empty.');
+      return false; // block submission
+    }
+    // Let the form submit (it posts to /update-profile which you already have).
+    // If you want to set a query param or show a spinner, do it here.
+    return true;
+  }
+</script>
+
+
+           <!-- EMAIL SECTION (editable inline) -->
+<label>Email:</label>
+<div class="profile-field-group" id="emailDisplayBlock">
+  <!-- Display current email (readonly) -->
+  <input type="text" value="{{.Email}}" readonly id="currentEmailDisplay">
+
+  <!-- Edit button toggles edit dropdown -->
+  <button type="button" id="editEmailBtn" style="display:inline-block;margin-top:8px;color:#0066ff;font-weight:600;background:none;border:none;cursor:pointer;">
+    Edit
+  </button>
+</div>
+
+<!-- Inline "dropdown" edit UI (hidden by default).
+     This input uses name="new_email" so your UpdateProfile() receives it. -->
+<div id="emailEditDropdown" style="display:none;margin-top:10px;">
+  <label style="font-size:13px;font-weight:600;color:#000;margin-bottom:6px;">Current</label>
+  <select disabled style="width:100%;padding:10px;border-radius:8px;border:1.2px solid #cfcfcf;background:#fff;margin-bottom:10px;">
+    <option>{{.Email}}</option>
+  </select>
+
+  <label style="font-size:13px;font-weight:600;color:#000;margin-bottom:6px;">New email</label>
+  <input type="email" name="new_email" id="newEmailInput" placeholder="Enter new email" style="width:100%;padding:12px;border-radius:8px;border:1.2px solid #cfcfcf;background:#fff;margin-bottom:10px;">
+
+  <div style="display:flex;gap:10px;">
+    <button type="submit" class="update-btn" onclick="return confirmEmailChange()" style="flex:1;">Confirm</button>
+    <button type="button" class="cancel-btn" onclick="toggleEmailEdit(false)" style="flex:1;background:#e5e5e5;border-radius:8px;border:none;padding:12px;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
+
+            <label>Date of Birth:</label>
+            <input type="date" name="birthdate" value="{{.Birthdate}}">
+
+            <button type="submit" class="update-btn">Update</button>
+        </form>
+
+    </div>
+</div>
+<div class="center-box">
+  <div class="todo-container">
+    <form method="POST" action="/add">
+      <input type="hidden" name="user" value="{{.user}}">
+      <input type="text" name="task" placeholder="Enter Task" required>
+
+      <label>Select Date:</label>
+      <input type="date" name="task_date" required>
+
+      <label>Select Time:</label>
+      <input type="time" name="task_time" required>
+
+      <button type="submit">Add Task</button>
+    </form>
+  </div>
+  </div>
+
+  <div id="success-popup" class="popup-overlay">
+    <div class="popup-box">
+      <p style="font-size: 18px; margin-bottom: 20px;">Added task successfully!</p>
+      <button id="popup-ok" class="popup-btn ok-btn">OK</button>
+      <button id="popup-cancel" class="popup-btn cancel-btn">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+function openProfile() {
+    document.getElementById("profileModal").style.display = "flex";
+}
+
+document.getElementById("closeModal").onclick = function () {
+    document.getElementById("profileModal").style.display = "none";
+};
+
+window.onclick = function (event) {
+    if (event.target === document.getElementById("profileModal")) {
+        document.getElementById("profileModal").style.display = "none";
+    }
+};
+</script>
+<script>
+  // Toggle email edit dropdown
+  function toggleEmailEdit(show) {
+    const el = document.getElementById('emailEditDropdown');
+    const editBtn = document.getElementById('editEmailBtn');
+    if (show === undefined) show = el.style.display === 'none';
+    el.style.display = show ? 'block' : 'none';
+    editBtn.innerText = show ? 'Close' : 'Edit';
+    if (show) {
+      document.getElementById('newEmailInput').focus();
+    }
+  }
+
+  document.getElementById('editEmailBtn').addEventListener('click', function() {
+    toggleEmailEdit();
+  });
+
+  // Front-end validation before submitting /update-profile
+  function confirmEmailChange() {
+    const newEmailEl = document.getElementById('newEmailInput');
+    const newEmail = newEmailEl.value.trim().toLowerCase();
+    const currentEmail = (document.getElementById('currentEmailDisplay').value || '').trim().toLowerCase();
+
+    if (newEmail === '') {
+      alert('New email cannot be empty.');
+      return false;
+    }
+
+    // basic email regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newEmail)) {
+      alert('Please enter a valid email address.');
+      return false;
+    }
+
+    if (newEmail === currentEmail) {
+      alert('New email is same as the current one.');
+      return false;
+    }
+
+    // allow form submission to /update-profile (server will still check duplicates)
+    return true;
+  }
+</script>
+
+</div>
+</body>
+</html>

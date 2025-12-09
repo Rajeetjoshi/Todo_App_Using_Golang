@@ -1,0 +1,92 @@
+package main
+
+import (
+	"database/sql"// gives access to databases
+	"net/http"//gives access to the server
+
+	"github.com/gin-gonic/gin"//GIN is a go web framework for building websites
+)
+
+var db *sql.DB//connects to database
+
+func main() {
+	db = InitDB()//initializes connection to db
+	r := gin.Default()//starts new web server
+	r.LoadHTMLGlob("templates/*")//tells GO where ur html files are
+
+	r.GET("/", showLogin)//shows login pg.
+	r.POST("/login", handleLogin)
+	r.POST("/signup", handleSignup)//for new user reg.
+	r.GET("/home", showHome)//shows ur todo list
+	r.POST("/add", addTodo)//add a new task
+	r.GET("/delete/:id", deleteTodo)//delete a task
+	r.GET("/timeline", showTimeline)//show the timeline of the tasks done
+
+	r.Run(":8080")//starts website on ur browser on 8080 port
+}
+func showLogin(c *gin.Context) {
+	c.HTML(http.StatusOK, "index.html", nil)//shows the login pg. i.e index.html
+}
+
+func handleSignup(c *gin.Context) {
+	user := c.PostForm("username")
+	pass := c.PostForm("password")// this handles the signup,, it takes username & password from the form 
+	_, err := db.Exec("INSERT INTO users(username,password) VALUES(?,?)", user, pass)//adds them to the users table in db
+	if err != nil {
+		c.String(http.StatusBadRequest, "User already exists!")//if that  username already exists it shows an error
+		return
+	}
+	c.Redirect(http.StatusSeeOther, "/")//otherwise goes back  to login pg.
+}
+
+func handleLogin(c *gin.Context) {
+	user := c.PostForm("username")
+	pass := c.PostForm("password")
+
+	row := db.QueryRow("SELECT id FROM users WHERE username=? AND password=?", user, pass)//checks if username and password is correct 
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		c.String(http.StatusUnauthorized, "Invalid credentials")
+		return//if not correct shows "Invalid"
+	}
+	c.Redirect(http.StatusSeeOther, "/home?user_id="+c.PostForm("username"))//if correct moves to home pg w ur username
+}
+
+func showHome(c *gin.Context) {
+	user := c.Query("user_id")
+	rows, _ := db.Query("SELECT id, task FROM todos WHERE user_id=(SELECT id FROM users WHERE username=?)", user)
+	var todos []map[string]any
+	for rows.Next() {
+		var id int
+		var task string
+		rows.Scan(&id, &task)
+		todos = append(todos, gin.H{"id": id, "task": task})
+	}
+	c.HTML(http.StatusOK, "home.html", gin.H{"user": user, "todos": todos})
+}
+
+func addTodo(c *gin.Context) {//takes ur new task from the form, saves it in todos table, and brings u back to home pg to see it added
+	user := c.PostForm("user")
+	task := c.PostForm("task")
+	db.Exec("INSERT INTO todos(user_id, task) VALUES((SELECT id FROM users WHERE username=?), ?)", user, task)
+	c.Redirect(http.StatusSeeOther, "/home?user_id="+user)
+}
+
+func deleteTodo(c *gin.Context) {//deletes the task with  that id then reloads the pg
+	id := c.Param("id")
+	user := c.Query("user_id")
+	db.Exec("DELETE FROM todos WHERE id=?", id)
+	c.Redirect(http.StatusSeeOther, "/home?user_id="+user)
+}
+
+func showTimeline(c *gin.Context) {//take all the tasks frm db 
+	rows, _ := db.Query("SELECT task, created_at FROM todos ORDER BY created_at DESC")
+	var data []map[string]any
+	for rows.Next() {
+		var t, time string
+		rows.Scan(&t, &time)
+		data = append(data, gin.H{"task": t, "time": time})
+	}
+	c.HTML(http.StatusOK, "timeline.html", gin.H{"timeline": data})
+}
