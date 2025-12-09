@@ -52,4 +52,25 @@ It supports **user login**, **task creation**, **timeline view**, and **profile 
 ---
 
 ## 📂 Project Structure
+project/
+│── main.go
+│── go.mod
+│── database/
+│ └── db.go
+│── components/
+│ ├── login.go
+│ ├── home.go
+│ ├── timeline.go
+│ └── profile.go
+│── templates/
+│ ├── index.html
+│ ├── home.html
+│ ├── timeline.html
+│ └── components...
+│── static/
+└── css /
+💡 Author
+
+Your Name
+GitHub: https://github.com/Rajeetjoshii
 
